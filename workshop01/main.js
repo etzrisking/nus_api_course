@@ -44,8 +44,8 @@ app.set('views', __dirname + '/views');
 
 //Route
 app.get('/map', (req, resp) => {
-
-	 // NOTE: coords hold the coordinates for the map
+    
+    // NOTE: coords hold the coordinates for the map
     const coord = {
         lat: parseFloat(req.query.lat),
         lon: parseFloat(req.query.lon)
@@ -56,6 +56,8 @@ app.get('/map', (req, resp) => {
     //Latitude and longitude from coord object above
     //API key is in keys.map
     const params = {
+        center: lat.toString() + "," + lon.toString(),
+        key: keys.map
     }
 
     getMap({ qs: params, encoding: null})
@@ -71,9 +73,9 @@ app.get('/map', (req, resp) => {
 });
 
 app.get('/information', (req, resp) => {
-
-	 //Note: cityName holds the cityName, to be used
-	 //in params below
+    
+    //Note: cityName holds the cityName, to be used
+    //in params below
     const cityName = req.query.cityName;
 
     //TODO 1/3: Add query parameters for OpenWeatherMap
@@ -81,11 +83,13 @@ app.get('/information', (req, resp) => {
     //Weather for city is in cityName variable
     //API key is in keys.weather
     const params = {
+        q: cityName,
+        appid: keys.weather
     }
 
     getWeather(params)
         .then(result => {
-			   // NOTE: countryCode holds the 2 character country code
+            // NOTE: countryCode holds the 2 character country code
             const countryCode = result.sys.country.toLowerCase();
 
             //TODO 2/3: Add query parameters for News API
@@ -93,6 +97,8 @@ app.get('/information', (req, resp) => {
             //The 2 character country code is found in countryCode variable
             //API key is in keys.news
             const params = {
+                country: countryCode,
+                apiKey: keys.news
             }
             return (Promise.all([ result, getNews(params) ]));
         })
