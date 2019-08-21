@@ -27,19 +27,81 @@ app.use(express.urlencoded({ extended: true }));
 // Mandatory workshop
 // TODO GET /api/states
 app.get('/api/states', (req, resp) => {
-	
-}
+	db.findAllStates()
+		.then(result => {
+			resp.status(200);
+			resp.type('application/json');
+			resp.json(result.map(v => `/api/state/${v}`));
+		})
+		.catch(error => {
+			resp.status(400);
+			resp.type('text/plain');
+			resp.send(error);
+		})
+})
 
+
+//TODO HEAD /api/state/:state
+app.head('api/state/:state', (req, resp) => {
+	//should check for state existence
+	resp.status(200)
+	resp.type('application/json')
+	resp.header('Accept-Ranges', 'cities')
+	resp.end();
+})
 
 
 // TODO GET /api/state/:state
-
-
-
+app.get('/api/state/:state', 
+	range({accept: 'cities', limit: 20}), //for pagination
+	(req, resp) => {
+	const state = req.params.state;
+	const first = req.range.first;
+	const last = req.range.last;
+	
+	Promise.all([
+		db.findCitiesByState(state, {limit: (last-first+1), offset: first}),
+		db.countCitiesInState(state)
+	]).then(results => {
+		//resp.status(200);
+		resp.status(206);
+		resp.type('application/json');
+		resp.range({
+			first: first,
+			last: last,
+			length: results[1]
+		});
+		resp.json(results[0].map(v => `/api/city/${v}`));
+	}).catch(error => {
+		resp.status(400);
+		resp.type('text/plain');
+		resp.send(error);
+	})
+})
 
 // TODO GET /api/city/:cityId
+app.get('/api/city/:cityId', (req, resp) => {
+	const cityId = req.params.cityId;
 
-
+	db.findCityById(cityId)
+		.then(result => {
+			if (result.length > 0) {
+				resp.status(200);
+				resp.type('application/json');
+				resp.json(result[0]);				
+			}
+			else {
+				resp.status(404);
+				resp.type('application/json');
+				resp.json({message: 'city not found'});				
+			}
+		})
+		.catch(error => {
+			resp.status(400);
+			resp.type('text/plain');
+			resp.send(error);
+		})
+})
 
 // TODO POST /api/city
 
