@@ -13,8 +13,8 @@ console.info(`Using ${keys.mongo}`);
 
 const db = CitiesDB({  
 	connectionUrl: keys.mongo, 
-	databaseName: 'zips', 
-	collectionName: 'city'
+	databaseName: 'cities', 
+	collectionName: 'cities'
 });
 
 const app = express();
@@ -26,7 +26,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Mandatory workshop
 // TODO GET /api/states
-
+app.get('/api/states', (req, resp) => {
+	
+}
 
 
 
