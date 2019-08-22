@@ -6,7 +6,7 @@ const range = require('express-range')
 const compression = require('compression')
 
 const { Validator, ValidationError } = require('express-json-validator-middleware')
-const  OpenAPIValidator  = require('express-openapi-validator').OpenApiValidator;
+const OpenAPIValidator  = require('express-openapi-validator').OpenApiValidator;
 
 const schemaValidator = new Validator({ allErrors: true, verbose: true });
 
@@ -34,9 +34,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// TODO 1/2 Load schemans
+// TODO 1/2 Load schemas
+const citySchema = require('./schema/city-schema.json')
+//const cityAPISpec = require('./schema/city-api.yaml')
 
-
+new OpenAPIValidator({
+	apiSpecPath: __dirname + '/schema/city-api.yaml'
+}).install(app)
 
 
 // Start of workshop
@@ -122,7 +126,10 @@ app.get('/api/city/:cityId', (req, resp) => {
 })
 
 // TODO POST /api/city
-app.post('/api/city', (req, resp) => {
+app.post(
+	'/api/city', 
+	schemaValidator.validate({body: citySchema}),
+	(req, resp) => {
 		const data = req.body
 		console.info('>> data:', data)
 
